@@ -118,7 +118,7 @@ async def show_roaster_page(
 
 # フォームから追加されたコーヒーを受け取る関数
 @app.get("/roaster/{access_hash}/coffee/add", response_class=HTMLResponse)
-async def add_coffee(
+async def add_get_coffee(
     request: Request,
     access_hash: str,
     db: Session = Depends(get_db),
@@ -145,7 +145,7 @@ async def add_coffee(
 
 
 @app.post("/roaster/coffee/add")
-async def add_coffee(
+async def add_post_coffee(
     request: Request,
     roast_level: str = Form(),
     acidity: str = Form(),
