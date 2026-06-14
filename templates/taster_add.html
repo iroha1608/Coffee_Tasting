@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><meta charset="UTF-8"><title>審査員登録</title></head>
+<body>
+  <h1>審査員登録</h1>
+  {% if error %}<p>{{ error }}</p>{% endif %}
+  <form method="post" action="/taster/add">
+    <p>名前<br><input type="text" name="name" value="{{ values.name if values else '' }}" required></p>
+    <p>よみがな<br><input type="text" name="name_kana" value="{{ values.name_kana if values else '' }}" required></p>
+    <p>都道府県<br>
+      <select name="prefecture" required>
+        <option value="">選択してください</option>
+        {% for pref in prefectures %}
+        <option value="{{ pref }}" {% if values and values.prefecture == pref %}selected{% endif %}>{{ pref }}</option>
+        {% endfor %}
+      </select>
+    </p>
+    <p>住所<br><input type="text" name="address" value="{{ values.address if values else '' }}" required></p>
+    <p>電話番号<br><input type="tel" name="phone" value="{{ values.phone if values else '' }}" required></p>
+    <p>メールアドレス<br><input type="email" name="email" value="{{ values.email if values else '' }}" required></p>
+    <p>勤務先<br><input type="text" name="company_name" value="{{ values.company_name if values else '' }}" required></p>
+    <button type="submit">登録</button>
+  </form>
+</body>
+</html>
