@@ -1,8 +1,85 @@
-from database import SessionLocal, engine, Base
-from models import Roaster, Coffee
-import random
 import json
+import random
 import sys
+import math
+from database import SessionLocal, engine, Base
+from models import Roaster, Coffee, Taster
+
+def list_coffee_data():
+    """すべてのコーヒーデータを取得し、シャッフルしたリストを返す"""
+    db = SessionLocal()
+    try:
+        coffees = db.query(Coffee).all()
+        random.shuffle(coffees)
+        return coffees
+    finally:
+        db.close()
+
+def list_taster_data():
+    """すべてのテイスターデータを取得し、シャッフルしたリストを返す"""
+    db = SessionLocal()
+    try:
+        tasters = db.query(Taster).all()
+        random.shuffle(tasters)
+        return tasters
+    finally:
+        db.close()
+
+def assign_coffees_to_tasters():
+    """
+    コーヒーをテイスターに割り当てる。
+    各テイスターに (コーヒー数 / テイスター数) の端数切り上げ分のコーヒーを割り当てる。
+    """
+    coffees = list_coffee_data()
+    tasters = list_taster_data()
+    
+    if not coffees or not tasters:
+        return {}
+
+    # 1人あたりのコーヒー数（端数切り上げ）
+    num_tasters = len(tasters)
+    num_coffees = len(coffees)
+    per_taster = math.ceil(num_coffees / num_tasters)
+    
+    print(f"\nAssigning {num_coffees} coffees to {num_tasters} tasters ({per_taster} per taster)...")
+    
+    assignments = {}
+    for i, taster in enumerate(tasters):
+        # スライスを使ってコーヒーを切り分ける
+        start_idx = i * per_taster
+        end_idx = start_idx + per_taster
+        assigned = coffees[start_idx:end_idx]
+        assignments[taster.id] = {
+            "taster": taster,
+            "coffees": assigned
+        }
+        
+    return assignments
+
+def export_json(filename="coffee_data.json"):
+    # テーブルが存在しない場合に作成
+    Base.metadata.create_all(bind=engine)
+    
+    db = SessionLocal()
+    try:
+        roasters = db.query(Roaster).all()
+        data = []
+        for r in roasters:
+            data.append({
+                "id": r.id,
+                "company_name": r.company_name,
+                "email": r.email,
+                "coffees": [c.name for c in r.coffees]
+            })
+        
+        # convert_json_to_csv.py が期待する構造 {"data": [...]} に合わせる
+        output = {"data": data}
+        
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(output, f, ensure_ascii=False, indent=4)
+        print(f"Exported data to {filename}")
+    finally:
+        db.close()
 
 def make_sample():
     # テーブルが存在しない場合に作成
@@ -51,6 +128,32 @@ def make_sample():
 
         # Coffee for Roaster 2
         db.add(Coffee(roaster_id=roaster2.id, name="マンデリン G1"))
+        db.add(Coffee(roaster_id=roaster2.id, name="グアテマラ SHB"))
+
+        # Tasters
+        taster1 = Taster(
+            name="テイスター 一郎",
+            name_kana="テイスター イチロウ",
+            prefecture="神奈川県",
+            address="横浜市中区1-1",
+            phone="045-123-4567",
+            email="taster1@example.com",
+            company_name="コーヒー評価部",
+            access_hash=Taster.new_hash()
+        )
+        db.add(taster1)
+        
+        taster2 = Taster(
+            name="テイスター 二郎",
+            name_kana="テイスター ジロウ",
+            prefecture="大阪府",
+            address="大阪市北区2-2",
+            phone="06-1234-5678",
+            email="taster2@example.com",
+            company_name="カフェ連盟",
+            access_hash=Taster.new_hash()
+        )
+        db.add(taster2)
 
         db.commit()
         print("Sample data created successfully.")
@@ -66,52 +169,39 @@ def list_all_data():
 
     db = SessionLocal()
     try:
-        coffees = db.query(Coffee).all()
-        print(type(coffees))
-        random.shuffle(coffees)
-        if not coffees:
-            print("No coffees found in the database.")
+        print("\n=== Roasters and their Coffees ===")
+        roasters = db.query(Roaster).all()
+
+        if not roasters:
+            print("No roasters found in the database.")
         else:
-            print(f"{'ID':<4} | {'Roaster ID':<10} | {'Coffee Name':<30} | {'Created At'}")
+            print(f"{'ID':<4} | {'Company Name':<20} | {'Email':<30} | {'Coffees'}")
             print("-" * 100)
-            for coffee in coffees:
-                print(f"{coffee.id:<4} | {coffee.roaster_id:<10} | {coffee.name:<30} | {coffee.created_at}")
+            for roaster in roasters:
+                coffee_names = ", ".join([c.name for c in roaster.coffees])
+                print(f"{roaster.id:<4} | {roaster.company_name:<20} | {roaster.email:<30} | {coffee_names}")
+
+        print("\n=== Coffee Assignments to Tasters ===")
+        assignments = assign_coffees_to_tasters()
+        if not assignments:
+            print("No assignments possible.")
+        else:
+            print(f"{'Taster Name':<20} | {'Assigned Coffees'}")
+            print("-" * 60)
+            for aid in assignments:
+                entry = assignments[aid]
+                t_name = entry["taster"].name
+                c_names = ", ".join([c.name for c in entry["coffees"]])
+                print(f"{t_name:<20} | {c_names}")
 
     finally:
         db.close()
 
-def export_json(filename="coffee_data.json"):
-     # テーブルが存在しない場合に作成
-     Base.metadata.create_all(bind=engine)
-
-     db = SessionLocal()
-     try:
-         roasters = db.query(Roaster).all()
-         data = []
-         for r in roasters:
-             data.append({
-                 "id": r.id,
-                 "company_name": r.company_name,
-                 "email": r.email,
-                 "coffees": [c.name for c in r.coffees]
-             })
-
-         # convert_json_to_csv.py が期待する構造 {"data": [...]} に合わせる
-         output = {"data": data}
-
-         with open(filename, "w", encoding="utf-8") as f:
-             json.dump(output, f, ensure_ascii=False, indent=4)
-         print(f"Exported data to {filename}")
-     finally:
-         db.close()
-
-
 if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) > 1 and sys.argv[1] == "sample":
-        make_sample()
-    if len(sys.argv) > 1 and sys.argv[1] == "json":
-        export_json()
-
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "sample":
+            make_sample()
+        elif sys.argv[1] == "json":
+            export_json()
+    
     list_all_data()
