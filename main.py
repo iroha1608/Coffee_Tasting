@@ -72,12 +72,12 @@ async def handle_roaster(
 
 
 @app.get("/roaster/login")
-async def show_login_form(request: Request):
+async def show_roaster_login_form(request: Request):
     return templates.TemplateResponse(request, "roaster_login.html", {})
 
 
 @app.post("/roaster/login")
-async def handle_login(
+async def handle_roaster_login(
     request: Request,
     email: str = Form(),
     db: Session = Depends(get_db),
@@ -204,6 +204,31 @@ async def handle_taster(
     db.refresh(taster)
 
     return RedirectResponse(url=f"/taster/{taster.access_hash}", status_code=303)
+
+
+@app.get("/taster/login")
+async def show_taster_login_form(request: Request):
+    return templates.TemplateResponse(request, "taster_login.html", {})
+
+
+@app.post("/taster/login")
+async def handle_taster_login(
+    request: Request,
+    email: str = Form(),
+    db: Session = Depends(get_db),
+):
+    taster = db.query(Taster).filter(Taster.email == email).first()
+    if not taster:
+        return templates.TemplateResponse(
+            request,
+            "taster_login.html",
+            {
+                "error": "このメールアドレスは登録されていません。",
+            },
+        )
+
+    return RedirectResponse(url=f"/taster/{taster.access_hash}", status_code=303)
+
 
 @app.get("/taster/{access_hash}")
 async def show_taster_page(
