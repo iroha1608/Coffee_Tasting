@@ -109,3 +109,27 @@ class Taster(Base):
     @staticmethod
     def new_hash() -> str:
         return secrets.token_urlsafe(16)
+
+
+class Result(Base):
+    __tablename__ = "results"
+
+    id = Column(Integer, primary_key=True, index=True)
+    taster_id = Column(Integer, ForeignKey("taster.id"), nullable=False)
+    coffee_id = Column(Integer, ForeignKey("coffees.id"), nullable=False)
+
+    # 審査前は未入力のため nullable=True
+    appearance_score = Column(Integer, nullable=True) # 外観: 1-3点
+    aroma_score = Column(Integer, nullable=True)      # 香り: 1-7点
+    flavor_score = Column(Integer, nullable=True)     # 味わい: 1-10点
+
+    # リレーションシップ
+    taster = relationship("Taster", back_populates="results")
+    coffee = relationship("Coffee", back_populates="results")
+
+    # DBレベルでのスコア範囲制約
+    __table_args__ = (
+        CheckConstraint('appearance_score >= 1 AND appearance_score <= 3', name='chk_appearance'),
+        CheckConstraint('aroma_score >= 1 AND aroma_score <= 7', name='chk_aroma'),
+        CheckConstraint('flavor_score >= 1 AND flavor_score <= 10', name='chk_flavor'),
+    )
