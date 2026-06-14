@@ -101,6 +101,7 @@ class Coffee(Base):
     annual_volume = Column(Integer, nullable=True) # 年間焙煎量
 
     roaster = relationship("Roaster", back_populates="coffees")
+    results = relationship("Result", back_populates="coffee")
 
 
 class Taster(Base):
@@ -116,6 +117,8 @@ class Taster(Base):
     company_name = Column(String, nullable=False)
     access_hash = Column(String, nullable=False, unique=True)
     created_at = Column(DateTime, default=lambda: datetime.now(JST))
+
+    results = relationship("Result", back_populates="taster")
 
     @staticmethod
     def new_hash() -> str:
