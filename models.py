@@ -89,6 +89,17 @@ class Coffee(Base):
     name = Column(String, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(JST))
 
+    roast_level = Column(String, nullable=True)    # 焙煎度
+    acidity = Column(String, nullable=True)        # 酸味
+    body = Column(String, nullable=True)           # ボディ
+    sweetness = Column(String, nullable=True)      # 甘味
+    package_size = Column(String, nullable=True)   # 販売パッケージサイズ
+    category = Column(String, nullable=True)       # 審査するコーヒー部門
+    roast_date = Column(String, nullable=True)     # 焙煎日（日付もハッカソンならStringで保存するのが一番安全！）
+
+    price = Column(Integer, nullable=True)         # 小売価格
+    annual_volume = Column(Integer, nullable=True) # 年間焙煎量
+
     roaster = relationship("Roaster", back_populates="coffees")
 
 
