@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ roaster.company_name }} マイページ</title>
+</head>
+<body>
+  <h1>{{ roaster.company_name }}</h1>
+
+  <h2>出品コーヒー一覧（{{ coffees | length }} / {{ max_coffees }} 件）</h2>
+
+  {% if error %}
+  <p>{{ error }}</p>
+  {% endif %}
+
+  {% if coffees %}
+  <ol>
+    {% for coffee in coffees %}
+    <li>{{ coffee.name }}</li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p>まだコーヒーが登録されていません。</p>
+  {% endif %}
+
+  {% if coffees | length < max_coffees %}
+  <form method="post" action="/roaster/{{ roaster.access_hash }}/coffee/add">
+    <input type="text" name="name" placeholder="コーヒー名" required>
+    <button type="submit">追加</button>
+  </form>
+  {% else %}
+  <p>登録上限（{{ max_coffees }}件）に達しました。</p>
+  {% endif %}
+</body>
+</html>
