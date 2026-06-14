@@ -41,13 +41,13 @@ def execute_matching(db: Session, items_per_taster: int = 12) -> bool:
 
     for taster in tasters:
         available_coffees = list(coffees)
-        # 1. ランダム性を担保
+        # ランダム性を担保
         random.shuffle(available_coffees)
 
-        # 2. 割り当て回数が少ない順に並べ替える（これで差が最大でも1になる）
+        # 割り当て回数が少ない順に並べ替える（これで差が最大でも1になる）
         available_coffees.sort(key=lambda c: coffee_counts[c.id])
 
-        # 3. 上位 N件を抽出し、Result（審査用レコード）として準備
+        # 上位 N件を抽出し、Result（審査用レコード）として準備
         assigned_coffees = available_coffees[:items_per_taster]
 
         for coffee in assigned_coffees:
