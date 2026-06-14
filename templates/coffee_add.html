@@ -1,0 +1,62 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>☕️コーヒー登録フォーム☕️</title>
+        <style>
+            body { font-family: sans-serif; margin: 30px; background-color: #f9f6f0; }
+            .form-container { background: white; padding: 25px; border-radius: 8px; max-width: 500px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            h2 { color: #4a3728; border-bottom: 2px solid #6f4e37; padding-bottom: 10px; }
+            label { font-weight: bold; display: block; margin-top: 15px; color: #555; }
+            input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+            button { background-color: #6f4e37; color: white; padding: 12px; border: none; border-radius: 4px; width: 100%; cursor: pointer; font-size: 16px; margin-top: 25px; }
+            button:hover { background-color: #553c2a; }
+        </style>
+    </head>
+    <body>
+        <div class="form-container">
+            <h2>☕️コーヒー登録フォーム☕️</h2>
+            
+            <form action="/roaster/coffee/add" method="POST">
+                <input type="hidden" name="access_hash" value="{{ roaster.access_hash }}">
+                
+                <label>焙煎度（Roast Level）*</label>
+                <input type="text" name="roast_level" required>
+                
+                <label>酸味（Acidity）*</label>
+                <input type="text" name="acidity" required>
+                
+                <label>ボディ（Body）*</label>
+                <input type="text" name="body" required>
+                
+                <label>甘味（Sweetness）*</label>
+                <input type="text" name="sweetness" required>
+                
+                <label>小売価格（税込）*</label>
+                <input type="text" name="price" required>
+                
+                <label>年間焙煎量（kg換算）*</label>
+                <input type="text" name="annual_volume" required>
+                
+                <label>焙煎日*</label>
+                <input type="date" name="roast_date" required>
+                
+                <label>販売パッケージサイズ*</label>
+                <input type="text" name="package_size" required>
+                
+                <label>審査するコーヒー部門*</label>
+                <select name="category" required>
+                    <option value="">コーヒーの種類を選んでください...</option>
+                    <option value="FR">フルーティ:FR</option>
+                    <option value="FL">フローラル:FL</option>
+                    <option value="NT">ナッティ:NT</option>
+                    <option value="CH">チョコレート:CH</option>
+                    <option value="SP">スパイシー:SP</option>
+                    <option value="CT">シトラス:CT</option>
+                </select>
+                
+                <button type="submit">送信する</button>
+            </form>
+        </div>
+    </body>
+    </html>
+

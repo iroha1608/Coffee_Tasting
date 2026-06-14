@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Form, Request, Depends, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
@@ -100,11 +100,12 @@ async def show_roaster_page(
     })
 
 
-@app.post("/roaster/{access_hash}/coffee/add")
+
+# フォームから追加されたコーヒーを受け取る関数
+@app.get("/roaster/{access_hash}/coffee/add", response_class=HTMLResponse)
 async def add_coffee(
     request: Request,
     access_hash: str,
-    name: str = Form(),
     db: Session = Depends(get_db),
 ):
     roaster = db.query(Roaster).filter(Roaster.access_hash == access_hash).first()
@@ -119,9 +120,52 @@ async def add_coffee(
             "error": f"出品コーヒーの登録は最大{MAX_COFFEES}件です。",
         })
 
-    db.add(Coffee(roaster_id=roaster.id, name=name))
+    return templates.TemplateResponse(request, "coffee_add.html", {"request": request, "roaster": roaster})
+
+
+@app.post("/roaster/coffee/add")
+async def add_coffee(
+    request: Request,
+    roast_level: str = Form(),
+    acidity: str = Form(),
+    body: str = Form(),
+    sweetness: str = Form(),
+    price: str = Form(),
+    annual_volume: str = Form(),
+    roast_date: str = Form(),
+    package_size: str = Form(),
+    category: str = Form(),
+    access_hash: str = Form(),
+    db: Session = Depends(get_db),
+):
+    roaster = db.query(Roaster).filter(Roaster.access_hash == access_hash).first()
+    if not roaster:
+        raise HTTPException(status_code=404, detail="ページが見つかりません")
+
+    if len(roaster.coffees) >= MAX_COFFEES:
+        return templates.TemplateResponse(request, "roaster_page.html", {
+            "roaster": roaster,
+            "coffees": roaster.coffees,
+            "max_coffees": MAX_COFFEES,
+            "error": f"出品コーヒーの登録は最大{MAX_COFFEES}件です。",
+        })
+    current_coffee_count = len(roaster.coffees) + 1
+    generated_name = f"コーヒー #{current_coffee_count}"
+
+    db.add(Coffee(
+        roaster_id=roaster.id,
+        name=generated_name,
+        roast_level=roast_level,
+        acidity=acidity,
+        body=body,
+        sweetness=sweetness,
+        price=price,
+        annual_volume=annual_volume,
+        roast_date=roast_date,
+        package_size=package_size,
+        category=category
+    ))
     db.commit()
     db.refresh(roaster)
 
     return RedirectResponse(url=f"/roaster/{access_hash}", status_code=303)
-

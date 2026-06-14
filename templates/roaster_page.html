@@ -24,12 +24,20 @@
   {% endif %}
 
   {% if coffees | length < max_coffees %}
-  <form method="post" action="/roaster/{{ roaster.access_hash }}/coffee/add">
-    <input type="text" name="name" placeholder="コーヒー名" required>
-    <button type="submit">追加</button>
-  </form>
+    <a href="/roaster/{{ roaster.access_hash }}/coffee/add" class="add-button">
+      ＋ 新しいコーヒーを追加する
+    </a>
   {% else %}
-  <p>登録上限（{{ max_coffees }}件）に達しました。</p>
+    <p>登録上限（{{ max_coffees }}件）に達しました。</p>
   {% endif %}
+
+  <!-- {% if coffees | length < max_coffees %} -->
+  <!-- <form method="post" action="/roaster/{{ roaster.access_hash }}/coffee/add"> -->
+  <!--   <input type="text" name="name" placeholder="コーヒー名" required> -->
+  <!--   <button type="submit">追加</button> -->
+  <!-- </form> -->
+  <!-- {% else %} -->
+  <!-- <p>登録上限（{{ max_coffees }}件）に達しました。</p> -->
+  <!-- {% endif %} -->
 </body>
 </html>
