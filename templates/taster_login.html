@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><meta charset="UTF-8"><title>マイページへアクセス</title></head>
+<body>
+  <h1>マイページへアクセス</h1>
+  {% if error %}<p>{{ error }}</p>{% endif %}
+  <form method="post" action="/taster/login">
+    <input type="email" name="email" placeholder="メールアドレス" required>
+    <button type="submit">アクセス</button>
+  </form>
+</body>
+</html>
