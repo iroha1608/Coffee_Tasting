@@ -1,8 +1,11 @@
 import secrets
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
+
+JST = ZoneInfo("Asia/Tokyo")
 
 PREFECTURES = [
     "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
@@ -30,7 +33,7 @@ class Roaster(Base):
     email = Column(String, nullable=False, unique=True)
     prefecture = Column(String, nullable=False)
     access_hash = Column(String, nullable=False, unique=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(JST))
 
     coffees = relationship("Coffee", back_populates="roaster")
 
@@ -45,6 +48,6 @@ class Coffee(Base):
     id = Column(Integer, primary_key=True, index=True)
     roaster_id = Column(Integer, ForeignKey("roasters.id"), nullable=False)
     name = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(JST))
 
     roaster = relationship("Roaster", back_populates="coffees")
