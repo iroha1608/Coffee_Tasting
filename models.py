@@ -1,7 +1,7 @@
 import secrets
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, CheckConstraint
 from sqlalchemy.orm import relationship
 from database import Base
 
